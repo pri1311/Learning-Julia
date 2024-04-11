@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:calendar_slider/calendar_slider.dart';
+import 'package:project_100days/models/Task.dart';
 import 'package:project_100days/widgets/task_tile.dart';
+import 'package:localstorage/localstorage.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
@@ -23,46 +25,59 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   final CalendarSliderController _controller = CalendarSliderController();
   late DateTime _selectedDateAppBBar;
-  late List<Map<String, Object>> tasks;
+  late List<Task> tasks;
 
   @override
   void initState() {
     super.initState();
     _selectedDateAppBBar = DateTime.now();
-    tasks = [
-      {
-        'id': 0,
-        'name': 'Habit 1',
-        'days': ['2024-03-03'],
-        'streak': 1,
-        'last_checked_on': '2024-03-03'
-      },
-      {
-        'id': 1,
-        'name': 'Habit 2',
-        'days': ['2024-03-03', '2024-03-02'],
-        'streak': 2,
-        'last_checked_on': '2024-03-03'
-      },
-      {
-        'id': 2,
-        'name': 'Habit 3',
-        'days': ['2024-03-03'],
-        'streak': 1,
-        'last_checked_on': '2024-03-03'
-      },
-      {
-        'id': 3,
-        'name': 'Habit 4',
-        'days': [],
-        'streak': 0,
-        'last_checked_on': ''
-      }
-    ];
+    tasks = [];
+    // tasks = [
+    //   {
+    //     'id': 0,
+    //     'name': 'Habit 1',
+    //     'days': ['2024-03-03'],
+    //     'streak': 1,
+    //     'last_checked_on': '2024-03-03'
+    //   },
+    //   {
+    //     'id': 1,
+    //     'name': 'Habit 2',
+    //     'days': ['2024-03-03', '2024-03-02'],
+    //     'streak': 2,
+    //     'last_checked_on': '2024-03-03'
+    //   },
+    //   {
+    //     'id': 2,
+    //     'name': 'Habit 3',
+    //     'days': ['2024-03-03'],
+    //     'streak': 1,
+    //     'last_checked_on': '2024-03-03'
+    //   },
+    //   {
+    //     'id': 3,
+    //     'name': 'Habit 4',
+    //     'days': [],
+    //     'streak': 0,
+    //     'last_checked_on': ''
+    //   }
+    // ];
+    final LocalStorage tasks_storage = new LocalStorage('tasks.json');
   }
 
   void checkCompleted(id) {
-    
+
+  }
+
+  void createNewTask(String name) {
+    DateTime dateToday = DateTime.now(); 
+    String date = dateToday.toString().substring(0,10);
+    String id = name + date;
+    Task newTask = Task(id, name, [], 0, "");
+    setState(() {
+      tasks.add(newTask);
+    });
+    print(date); // 2021-06-24
   }
 
   @override
@@ -117,12 +132,12 @@ class _MyHomePageState extends State<MyHomePage> {
                   itemCount: tasks.length,
                   itemBuilder: (context, index) {
                     final task = tasks[index];
-                    if ((task["streak"] as int) < 100) {
+                    if ((task.streak) < 100) {
                       // return ListTile(title: Text(task["name"] as String));
                       return HabitTile(
-                          habitName: task["name"] as String,
+                          habitName: task.name,
                           habitCompleted: true,
-                          onChanged: (value) => {print(value)},
+                          onChanged: (value) => {checkCompleted(task.id)},
                           settingsTapped: null,
                           deleteTapped: null);
                     }
@@ -157,7 +172,9 @@ class _MyHomePageState extends State<MyHomePage> {
                     child: SizedBox(
                       height: button_height,
                       child: ElevatedButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          createNewTask("Go SHOPPING!");
+                        },
                         style: ElevatedButton.styleFrom(
                           backgroundColor:
                               Theme.of(context).colorScheme.inversePrimary,
